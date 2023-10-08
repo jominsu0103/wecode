@@ -135,6 +135,7 @@ app.delete("/posts/:postingId", (req, res) => {
 });
 
 //유저와 게시물 조회코드
+//2023-10-08 commit
 app.get("/users/:userId/posts", (req, res) => {
   const userId = parseInt(req.params.userId, 10);
 
