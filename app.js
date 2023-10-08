@@ -36,39 +36,42 @@ const posts = [
   },
 ];
 
+//회원가입 코드
 app.post("/signup", (req, res) => {
   const newUser = req.body;
-
+  
   newUser.id = parseInt(newUser.id, 10);
-
+  
   users.push(newUser);
-
+  
   res.status(201).json({
     message: "User created successfully",
     user: newUser,
   });
-
+  
   console.log("현재유저 :", users);
 });
 
+//게시물 등록 코드
 app.post("/posts", (req, res) => {
   const newPost = req.body;
-
+  
   newPost.id = parseInt(newPost.id, 10);
   newPost.userId = parseInt(newPost.userId, 10);
-
+  
   posts.push(newPost);
-
+  
   res.status(201).json({
     message: "Post created successfully",
     post: newPost,
   });
-
+  
   console.log("현재 게시글:", posts);
 });
 
 //http -v POST localhost:8000/posts id=3 title="아직 모르겠다" content="지금 배워가는중" userId=1 -j
 
+//게시물 목록 조회코드
 app.get("/", (req, res) => {
   const postList = posts.map((post) => {
     const user = users.find((user) => user.id === post.userId);
@@ -84,6 +87,7 @@ app.get("/", (req, res) => {
   res.status(200).json({ data: postList });
 });
 
+//게시물 수정 코드
 app.patch("/posts/:postingId", (req, res) => {
   const postingId = parseInt(req.params.postingId, 10);
   const updatedPost = req.body;
@@ -110,6 +114,7 @@ app.patch("/posts/:postingId", (req, res) => {
   console.log("현재 게시글 목록:", posts);
 });
 
+//게시물 삭제 코드
 app.delete("/posts/:postingId", (req, res) => {
   const postingId = parseInt(req.params.postingId, 10);
 
@@ -127,6 +132,31 @@ app.delete("/posts/:postingId", (req, res) => {
   });
 
   console.log("현재 게시글 목록 : ", posts);
+});
+
+//유저와 게시물 조회코드
+app.get("/users/:userId/posts", (req, res) => {
+  const userId = parseInt(req.params.userId, 10);
+
+  const userPosts = posts.filter((post) => post.userId === userId);
+
+  if (userPosts.length === 0) {
+    return res.status(404).json({ message: "User has no posts" });
+  }
+
+  const userData = users.find((user) => user.id === userId);
+
+  res.status(200).json({
+    data: {
+      userId: userData.id,
+      userName: userData.name,
+      postings: userPosts.map((post) => ({
+        postingId: post.id,
+        postingName: post.title,
+        postingContent: post.content,
+      })),
+    },
+  });
 });
 
 app.listen(port, () => {
