@@ -160,6 +160,9 @@ app.get("/users/:userId/posts", (req, res) => {
   });
 });
 
+
+//commit 2023-10-10
+//port 설정
 app.listen(port, () => {
   console.log(`Server is running on ${port}`);
 });
