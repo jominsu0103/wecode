@@ -111,6 +111,7 @@ app.patch("/posts/:postingId", (req, res) => {
     },
   });
 
+
   console.log("현재 게시글 목록:", posts);
 });
 
