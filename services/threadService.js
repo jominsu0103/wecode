@@ -63,9 +63,10 @@ const postUpdate = async (req, res) => {
 
 const deletePost = async (req, res) => {
   const userId = req.body.user_id;
+  const threadId = req.body.thread_id;
 
   const delectElement = await appDataSource.query(
-    `delete from threads where user_id = '${userId}'`
+    `delete from threads where user_id = '${userId}' and thread_id = '${threadId}' `
   );
 
   console.log(delectElement);
