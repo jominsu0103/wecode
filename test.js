@@ -1,39 +1,33 @@
+const appDataSource = require('./db')
+const dotenv = require("dotenv");
+dotenv.config();
 const http = require("http");
 const express = require("express");
-const { DataSource } = require("typeorm");
-const dotenv = require("dotenv");
 
 const { signUp } = require("./services/userService");
-const { insertPost } = require("./services/threadService");
-const { totalSelect } = require("./services/threadService");
-const { userSelect } = require("./services/threadService");
-const { postUpdate } = require("./services/threadService");
-const { deletePost } = require("./services/threadService");
-const { insertLikes } = require("./services/threadService");
+const {
+  insertPost,
+  totalSelect,
+  userSelect,
+  postUpdate,
+  deletePost,
+  insertLikes,
+} = require("./services/threadService");
 
-dotenv.config();
-
-const appDataSource = new DataSource({
-  type: process.env.TYPEORM_CONNECTION,
-  host: process.env.TYPEORM_HOST,
-  port: process.env.TYPEORM_PORT,
-  username: process.env.TYPEORM_USERNAME,
-  password: process.env.TYPEORM_PASSWORD,
-  database: process.env.TYPEORM_DATABASE,
-});
 
 const app = express();
+
+
 app.use(express.json());
 
-//Health check function
+// Health check function
 app.get("/", async (req, res) => {
   res.status(200).json({
     message: "hello",
   });
 });
 
-//http 용어는 front 입장에서 만들어졌기 때문에 get은 front가 back에게 가져오는거 post는 front가 back에게 보내는것
-
+// Routes
 app.post("/users/signUp", signUp);
 app.post("/posts/posting", insertPost);
 app.get("/posts/read", totalSelect);

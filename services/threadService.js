@@ -1,3 +1,5 @@
+const appDataSource = require('../db')
+
 const insertPost = async (req, res) => {
   const postContent = req.body.content;
   const postUserId = req.body.user_id;
@@ -91,5 +93,5 @@ module.exports = {
   userSelect,
   postUpdate,
   deletePost,
-  insertLikes
+  insertLikes,
 }

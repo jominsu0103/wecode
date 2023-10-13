@@ -1,3 +1,5 @@
+const appDataSource = require('../db')
+
 // 1.회원가입 하는 함수 생성
 const signUp = async (req, res) => {
   //1-1 request body로부터 사용자 정보 받아오기
