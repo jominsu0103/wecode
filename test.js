@@ -96,11 +96,12 @@ const userSelect = async (req, res) => {
 };
 
 const postUpdate = async (req, res) => {
-  const postingId = req.body.user_id;
+  const userId = req.body.user_id;
   const updateData = req.body.content;
+  const threadId = req.body.thread_id;
 
   const updateElement = await appDataSource.query(
-    `update threads set content = '${updateData}' where user_id = '${postingId}'`
+    `update threads set content = '${updateData}' where user_id = '${userId}' and thread_id = '${threadId}'`
   );
   const selectElement = await appDataSource.query(`select * from threads`);
 
