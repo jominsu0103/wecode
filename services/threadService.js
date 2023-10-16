@@ -1,4 +1,4 @@
-const appDataSource = require('../db')
+const appDataSource = require("../db");
 
 const insertPost = async (req, res) => {
   const postContent = req.body.content;
@@ -43,13 +43,35 @@ const userSelect = async (req, res) => {
   });
 };
 
-const postUpdate = async (req, res) => {
-  const userId = req.body.user_id;
+const updatePost = async (req, res) => {
+  const userId = req.body.userId;
   const updateData = req.body.content;
-  const threadId = req.body.thread_id;
+  const threadId = req.params.threadId;
+
+  const existingThread = await appDataSource.query(
+    `select id , content , user_id from threads where id = ${threadId}`
+  );
+  if (existingThread.length === 0) {
+    return res.status(404).json({
+      message: "POST_NOT_FOUND",
+    });
+  }
+
+  const existingUser = await appDataSource.query(`
+  select id , email from users where id = '${userId}'
+  `);
+  if (existingUser.length === 0) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const threadUser = existingThread[0].user_id;
+  const user = existingUser[0].id;
+  if (threadUser !== user) {
+    return res.status(403).json({ message: "Unauthenticated" });
+  }
 
   const updateElement = await appDataSource.query(
-    `update threads set content = '${updateData}' where user_id = '${userId}' and thread_id = '${threadId}'`
+    `update threads set content = '${updateData}' where id = ${threadId} and user_id = '${userId}'`
   );
   const selectElement = await appDataSource.query(`select * from threads`);
 
@@ -62,11 +84,34 @@ const postUpdate = async (req, res) => {
 };
 
 const deletePost = async (req, res) => {
-  const userId = req.body.user_id;
-  const threadId = req.body.thread_id;
+  const userId = req.body.userId;
+  const threadId = req.params.threadId;
+
+  const existingThread = await appDataSource.query(
+    `select id , content, user_id from threads where id = ${threadId}`
+  );
+  if (existingThread.length === 0) {
+    return res.status(404).json({
+      message: "POST_NOT_FOUND",
+    });
+  }
+
+  const existingUser = await appDataSource.query(`
+  select id , email from users where id = '${userId}'
+  `);
+  if (existingUser.length === 0) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const threadUser = existingThread[0].user_id;
+  const user = existingUser[0].id;
+
+  if (threadUser !== user) {
+    return res.status(403).json({ message: "Unauthenticated" });
+  }
 
   const delectElement = await appDataSource.query(
-    `delete from threads where user_id = '${userId}' and thread_id = '${threadId}' `
+    `delete from threads where id = ${threadId} and user_id = '${userId}' `
   );
 
   console.log(delectElement);
@@ -92,7 +137,7 @@ module.exports = {
   insertPost,
   totalSelect,
   userSelect,
-  postUpdate,
+  updatePost,
   deletePost,
   insertLikes,
-}
+};

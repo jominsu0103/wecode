@@ -9,7 +9,7 @@ const {
   insertPost,
   totalSelect,
   userSelect,
-  postUpdate,
+  updatePost,
   deletePost,
   insertLikes,
 } = require("./services/threadService");
@@ -32,8 +32,8 @@ app.post("/users/signUp", signUp);
 app.post("/posts/posting", insertPost);
 app.get("/posts/read", totalSelect);
 app.get("/users/posts/read", userSelect);
-app.patch("/posts/posting/update", postUpdate);
-app.delete("/posts/posting/delete", deletePost);
+app.put("/posts/:threadId", updatePost); // patch -> put
+app.delete("/posts/:threadId", deletePost);
 app.post("/posts/posting/heart", insertLikes);
 
 const server = http.createServer(app);
