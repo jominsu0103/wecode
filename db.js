@@ -9,11 +9,7 @@ const appDataSource = new DataSource({
   port: process.env.TYPEORM_PORT,
   username: process.env.TYPEORM_USERNAME,
   password: process.env.TYPEORM_PASSWORD,
-  database: process.env.TYPEORM_DATABASE,
-});
-
-appDataSource.initialize().then(() => {
-  console.log("데이터 소스가 초기화되었습니다");
+  database: process.env.TYPEORM_DATABASE
 });
 
 module.exports = appDataSource;

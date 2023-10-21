@@ -1,35 +1,43 @@
-const appDataSource = require('../db')
+const userDao = require("../models/userDao");
+const etc = require("../middleware/etc");
 
-// 1.회원가입 하는 함수 생성
-const signUp = async (req, res) => {
-  //1-1 request body로부터 사용자 정보 받아오기
+const signUp = async (nickname, email, password) => {
+  //패스워드 예외처리
+  if (!etc.validatePassword(password)) {
+    const err = new Error("패스워드는 10자리 이상이어야 합니다.");
+    err.status = 409;
+    throw err;
+  }
+  //이메일 예외처리
+  if (!etc.validateEmail(email)) {
+    const err = new Error("이메일 형식이 올바르지 않습니다.");
+    err.status = 409;
+    throw err;
+  }
 
-  const userNickName = req.body.nickname;
-  const userEmail = req.body.email;
-  const userPassword = req.body.password;
+  //중복 이메일 예외처리
+  const checkEmail = await userDao.checkEmail(email);
+  if (checkEmail) {
+    const err = new Error("이미 사용 중인 이메일입니다.");
+    err.status = 409;
+    throw err;
+  }
 
-  console.log("req userName: " + userNickName);
-  console.log("req userName: " + userEmail);
-  console.log("req userName: " + userPassword);
-  //1-2 받아온 정보를 DB에 저장함
-  //1-2-1 typeorm 설치 후 , appData
-  //1-2-2 SQL
+  const hashedPassword = await etc.makeHash(password, 10);
 
-  const userData = await appDataSource.query(`
-  insert into users (nickname, email, password) 
-  values ('${userNickName}', '${userEmail}', '${userPassword}')`);
+  const insertHash = await userDao.signUp(nickname, email, hashedPassword);
 
-  //1-3 저장이 되었는지 확인하기
+  const result = await etc.checkHash(password, hashedPassword);
 
-  console.log("typeorm return userData" + userData);
-  //1-4 front에게 저장이 잘 되었다고 res 보내기
-
-  return res.status(201).json({ message: "SignUp successful" });
+  return insertHash;
 };
 
-//2.Express app에 회원가입 하는 함수 연결
-//2-1. HTTP method와 HTTP url 같이 설정하여 연결
+const login = async (email) => {
+  const users = await userDao.login(email);
 
+  return users;
+};
 module.exports = {
   signUp,
+  login,
 };

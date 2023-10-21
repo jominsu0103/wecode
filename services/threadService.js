@@ -1,143 +1,46 @@
-const appDataSource = require("../db");
+const threadDao = require("../models/threadDao");
 
-const insertPost = async (req, res) => {
-  const postContent = req.body.content;
-  const postUserId = req.body.user_id;
+const insertThread = async (content, userId) => {
+  const insertThread = await threadDao.insertThread(content, userId);
 
-  console.log(postContent);
-  console.log(postUserId);
-
-  const postData = await appDataSource.query(`
-  insert into threads (content , user_id) values ('${postContent}' , '${postUserId}')`);
-
-  console.log("typeorm return postData" + postData);
-
-  return res.status(201).json({ message: "post created" });
+  return insertThread;
 };
 
-//2023-10-13 sql update
-const totalSelect = async (req, res) => {
-  const selectData = await appDataSource.query(`
-  select threads.* ,users.nickname as name from threads join users on threads.user_id = users.id`);
+const totalSelect = async () => {
+  const totalAllSelect = await threadDao.totalSelect();
 
-  console.log("typeorm return selectData" + selectData);
-
-  return res.status(200).json({
-    message: "post read",
-    data: selectData,
-  });
+  return totalAllSelect;
 };
 
-const userSelect = async (req, res) => {
-  const userId = req.body.user_id;
+const oneSelect = async (threadId, userId) => {
+  const userSelect = await threadDao.userSelect(threadId , userId);
 
-  const selectData = await appDataSource.query(
-    `select t.content from users u join threads t on u.id = t.user_id where u.id = '${userId}'`
-  );
-
-  console.log("typeorm return selectData" + selectData);
-
-  return res.status(200).json({
-    message: "user post read",
-    data: selectData,
-  });
+  return userSelect;
 };
 
-const updatePost = async (req, res) => {
-  const userId = req.body.userId;
-  const updateData = req.body.content;
-  const threadId = req.params.threadId;
+const updateThread = async (content, threadId, userId) => {
+  const updatePost = await threadDao.updateThread(content, threadId, userId);
 
-  const existingThread = await appDataSource.query(
-    `select id , content , user_id from threads where id = ${threadId}`
-  );
-  if (existingThread.length === 0) {
-    return res.status(404).json({
-      message: "POST_NOT_FOUND",
-    });
-  }
-
-  const existingUser = await appDataSource.query(`
-  select id , email from users where id = '${userId}'
-  `);
-  if (existingUser.length === 0) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  const threadUser = existingThread[0].user_id;
-  const user = existingUser[0].id;
-  if (threadUser !== user) {
-    return res.status(403).json({ message: "Unauthenticated" });
-  }
-
-  const updateElement = await appDataSource.query(
-    `update threads set content = '${updateData}' where id = ${threadId} and user_id = '${userId}'`
-  );
-  const selectElement = await appDataSource.query(`select * from threads`);
-
-  console.log(updateElement);
-
-  return res.status(200).json({
-    message: "posting update successfully",
-    data: selectElement,
-  });
+  return updatePost;
 };
 
-const deletePost = async (req, res) => {
-  const userId = req.body.userId;
-  const threadId = req.params.threadId;
+const deleteThread = async (threadId, userId) => {
+  const deletePost = await threadDao.deleteThread(threadId, userId);
 
-  const existingThread = await appDataSource.query(
-    `select id , content, user_id from threads where id = ${threadId}`
-  );
-  if (existingThread.length === 0) {
-    return res.status(404).json({
-      message: "POST_NOT_FOUND",
-    });
-  }
-
-  const existingUser = await appDataSource.query(`
-  select id , email from users where id = '${userId}'
-  `);
-  if (existingUser.length === 0) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  const threadUser = existingThread[0].user_id;
-  const user = existingUser[0].id;
-
-  if (threadUser !== user) {
-    return res.status(403).json({ message: "Unauthenticated" });
-  }
-
-  const delectElement = await appDataSource.query(
-    `delete from threads where id = ${threadId} and user_id = '${userId}' `
-  );
-
-  console.log(delectElement);
-
-  return res.status(200).json({ message: "delete post successfully" });
+  return deletePost;
 };
 
-const insertLikes = async (req, res) => {
-  const userId = req.body.user_id;
-  const threadId = req.body.thread_id;
+const insertLikes = async (userId, threadId) => {
+  const likes = await threadDao.likes(userId, threadId);
 
-  const heart = await appDataSource.query(
-    `insert into thread_likes (user_id, thread_id)
-    values ('${userId}' , '${threadId}')`
-  );
-
-  console.log(heart);
-
-  return res.status(200).json({ message: "insert heart successfully" });
+  return likes;
 };
 
 module.exports = {
-  insertPost,
+  insertThread,
   totalSelect,
-  userSelect,
-  updatePost,
-  deletePost,
+  oneSelect,
+  updateThread,
+  deleteThread,
   insertLikes,
 };
